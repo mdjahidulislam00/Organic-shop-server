@@ -39,7 +39,7 @@ app.post('/addProduct', async (req, res) => {
       const db = client.db(`${process.env.DB_NAME}`);
       const coll = db.collection(`${process.env.DB_COLL}`);
       
-      const result = await coll.insertMany(product);
+      const result = await coll.insertOne(product);
       
       if (result.insertedCount === 1) {
         res.send(201).json({ message: 'Product added successfully' });
@@ -70,8 +70,54 @@ app.get('/getProducts', async (req, res) => {
     }
   });
 
+  //Read Data from server
+app.get('/getAllProducts', async (req, res) => {
+  try {
+    const db = client.db(`${process.env.DB_NAME}`);
+    const coll = db.collection(`${process.env.DB_COLL}`);
+    
+    // Retrieve all products from the collection
+    const products = await coll.find().toArray();
+    res.send(products);
+    
+    console.log('Data Load Successfully');
+  } catch (error) {
+    console.error("Error retrieving products:", error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
 
-//Find One Data by id
+
+// Delete item 
+app.delete('/deleteProductById/:id', async (req, res) => {
+  const deleteProductId = req.params.id; // Get the ID to delete from the URL
+  try {
+    const db = client.db(process.env.DB_NAME);
+    const coll = db.collection(process.env.DB_COLL);
+
+    // Convert the ID to ObjectId if needed, assuming it's a MongoDB ObjectId
+    // const deleteObjectId = new ObjectId(deleteProductId);
+
+    // Delete the product with the specified ID
+    const result = await coll.deleteOne({ id: (deleteProductId )});
+
+    if (result.deletedCount === 1) {
+      // If deletedCount is 1, it means the item was found and deleted
+      console.log(`Product with ID ${deleteProductId} deleted successfully.`);
+      res.status(204).send(deleteProductId); // Respond with a 204 No Content status
+    } else {
+      // If deletedCount is not 1, it means the item was not found
+      console.log(`Product with ID ${deleteProductId} not found.`);
+      res.status(404).json({ message: `Product with ID ${deleteProductId} not found` });
+    }
+  } catch (error) {
+    console.error("Error deleting product:", error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+
+
 // Add a route to find data by ID
 app.get('/getProductById/:id', async (req, res) => {
     try {
