@@ -95,11 +95,8 @@ app.delete('/deleteProductById/:id', async (req, res) => {
     const db = client.db(process.env.DB_NAME);
     const coll = db.collection(process.env.DB_COLL);
 
-    // Convert the ID to ObjectId if needed, assuming it's a MongoDB ObjectId
-    // const deleteObjectId = new ObjectId(deleteProductId);
-
     // Delete the product with the specified ID
-    const result = await coll.deleteOne({ id: (deleteProductId )});
+    const result = await coll.deleteOne({ _id: new ObjectId (deleteProductId )});
 
     if (result.deletedCount === 1) {
       // If deletedCount is 1, it means the item was found and deleted
@@ -117,17 +114,55 @@ app.delete('/deleteProductById/:id', async (req, res) => {
 });
 
 
+//update product information
+app.patch('/updatedProductById/:id', async (req, res) => {
+  const updateProductId = req.params.id;
+  console.log(req.body.updateProductId); // Get the ID to update from the URL
+  // const { category, name, price, stock } = req.body.updatedProduct; // Get updated fields from the request body
+
+  try {
+    const db = client.db(process.env.DB_NAME);
+    const coll = db.collection(process.env.DB_COLL);
+
+    // Construct the update object with the fields you want to update
+    const updateObject = {
+      $set: {
+        category: req.body.category,
+        name: req.body.name,
+        price: req.body.price,
+        stock: req.body.stock
+      }
+    };
+
+    // Update the product with the specified ID
+    const result = await coll.updateOne({ _id: new ObjectId(updateProductId) }, updateObject);
+
+    if (result.matchedCount === 1) {
+      // If matchedCount is 1, it means the item was found and updated
+      console.log(`Product with ID ${updateProductId} updated successfully.`);
+      res.status(204).send(); // Respond with a 204 No Content status
+    } else {
+      // If matchedCount is not 1, it means the item was not found
+      console.log(`Product with ID ${updateProductId} not found.`);
+      res.status(404).json({ message: `Product with ID ${updateProductId} not found` });
+    }
+  } catch (error) {
+    console.error("Error updating product:", error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+
 
 // Add a route to find data by ID
 app.get('/getProductById/:id', async (req, res) => {
     try {
-      const productId = req.params.id; // Retrieve the ID from the URL parameter
-      console.log(productId);
+      const productId = req.params.id;  // Retrieve the ID from the URL parameter
       const db = client.db(process.env.DB_NAME);
       const coll = db.collection(process.env.DB_COLL);
   
       // Query the database to find the data by ID
-      const product = await coll.findOne({ id: (productId)})
+      const product = await coll.findOne({ _id: new ObjectId (productId)})
       if (!product) {
         return res.status(404).json({ message: 'Product not found' });
       }
