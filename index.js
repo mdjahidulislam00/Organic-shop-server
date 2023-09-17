@@ -116,8 +116,10 @@ app.delete('/deleteProductById/:id', async (req, res) => {
 
 //update product information
 app.patch('/updatedProductById/:id', async (req, res) => {
-  const updateProductId = req.params.id;
-  console.log(req.body.updateProductId); // Get the ID to update from the URL
+  console.log(req.body.name);
+  const updateProductId = req.params;
+  console.log(updateProductId);
+   // Get the ID to update from the URL
   // const { category, name, price, stock } = req.body.updatedProduct; // Get updated fields from the request body
 
   try {
