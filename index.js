@@ -167,7 +167,27 @@ app.patch('/updatedProductById/:id', async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 });
-  
+
+//Insert Data for Order list
+app.post('/addOrder', async (req, res) => {
+  console.log(req.body);
+  try {
+    const product = req.body;
+    const db = client.db(process.env.DB_NAME);
+    const coll = db.collection('userOrder');
+    
+    const result = await coll.insertOne(product);
+    
+    if (result.insertedCount === 1) {
+      res.status(201).json({ message: 'Product added successfully' });
+    } else {
+      res.status(500).json({ message: 'Failed to add product' });
+    }
+  } catch (error) {
+    console.error("Error adding product:", error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
   
 //Listen Port Configuration
 app.listen(port, () => {
