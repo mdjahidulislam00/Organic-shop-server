@@ -168,9 +168,8 @@ app.patch('/updatedProductById/:id', async (req, res) => {
   }
 });
 
-//Insert Data for Order list
+//Insert Data for Order
 app.post('/addOrder', async (req, res) => {
-  console.log(req.body);
   try {
     const product = req.body;
     const db = client.db(process.env.DB_NAME);
@@ -188,7 +187,30 @@ app.post('/addOrder', async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 });
-  
+
+//get order by email
+app.get('/getProductByEmail/:email', async (req, res) => {
+  try {
+    const userEmail = req.params.email; // Corrected parameter name
+     // Retrieve the email from the URL parameter
+    const db = client.db(process.env.DB_NAME);
+    const coll = db.collection('userOrder');
+
+    // Query the database to find the data by email
+    const orderEmail = await coll.findOne({ email: userEmail }); // Use userEmail here
+    if (!orderEmail) {
+      return res.status(404).json({ message: 'order not found' });
+    }
+
+    // Send the retrieved data as a JSON response
+    res.status(200).json(orderEmail);
+  } catch (error) {
+    console.error('Error fetching order by email:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+
 //Listen Port Configuration
 app.listen(port, () => {
     console.log(`server run at http://localhost:${port}`);
